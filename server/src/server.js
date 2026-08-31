@@ -44,8 +44,15 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, Postman, Vercel serverless)
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman, serverless)
+    if (
+      !origin || 
+      allowedOrigins.includes(origin) || 
+      origin.endsWith('.vercel.app') || 
+      origin.endsWith('.netlify.app') || 
+      origin.endsWith('.onrender.com') ||
+      origin.endsWith('.railway.app')
+    ) {
       return callback(null, true);
     }
     return callback(null, true); // Permissive in production for custom domains
