@@ -1,0 +1,29 @@
+{
+  "name": "ashtavinayak-mandal-cash-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "अष्टविनायक मित्र मंडळ — गणेशोत्सव Cash Collection & Financial Accounting Management System",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run frontend:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "vercel-build": "cd frontend && npm install && npm run build",
+    "prisma:generate": "cd server && npx prisma generate",
+    "prisma:migrate": "cd server && npx prisma migrate dev",
+    "prisma:seed": "cd server && node prisma/seed.js",
+    "start": "cd server && node src/server.js"
+  },
+  "keywords": [
+    "ganeshotsav",
+    "cash-collection",
+    "mandal-management",
+    "prisma",
+    "postgresql",
+    "exceljs",
+    "react",
+    "mern"
+  ],
+  "author": "Ashtavinayak Mitra Mandal, Boisar",
+  "license": "ISC"
+}

@@ -1,0 +1,192 @@
+// Prisma Schema for Ashtavinayak Mitra Mandal Cash Collection Management System
+// Primary Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TREASURER
+  COLLECTOR
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  VOID
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  BANK_TRANSFER
+}
+
+model User {
+  id                 String       @id @default(cuid())
+  name               String
+  username           String       @unique
+  email              String?      @unique
+  mobile             String?
+  password           String
+  role               Role         @default(ADMIN)
+  status             Status       @default(ACTIVE)
+  mustChangePassword Boolean      @default(false)
+  lastLogin          DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  collectionsCreated Collection[] @relation("CreatorCollections")
+  expensesCreated    Expense[]
+  auditLogs          AuditLog[]
+
+  @@map("users")
+}
+
+model Collector {
+  id          String       @id @default(cuid())
+  name        String
+  mobile      String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  collections Collection[]
+
+  @@index([name])
+  @@index([isActive])
+  @@map("collectors")
+}
+
+model Donor {
+  id                String       @id @default(cuid())
+  name              String
+  mobile            String       @unique
+  address           String?
+  totalContribution Float        @default(0.0)
+  donationCount     Int          @default(0)
+  lastDonationDate  DateTime?
+  notes             String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  collections       Collection[]
+
+  @@index([mobile])
+  @@index([name])
+  @@map("donors")
+}
+
+model Collection {
+  id             String       @id @default(cuid())
+  receiptNo      String       @unique
+  donorId        String?
+  donor          Donor?       @relation(fields: [donorId], references: [id])
+  donorName      String
+  mobile         String
+  address        String?
+  amount         Float
+  paymentMode    PaymentMode  @default(CASH)
+  purpose        String       @default("Ganeshotsav Donation")
+  collectorId    String?
+  collector      Collector?   @relation(fields: [collectorId], references: [id])
+  collectorName  String?
+  collectionDate DateTime     @default(now())
+  status         Status       @default(ACTIVE)
+  voidReason     String?
+  voidedBy       String?
+  voidedAt       DateTime?
+  createdById    String?
+  createdBy      User?        @relation("CreatorCollections", fields: [createdById], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([receiptNo])
+  @@index([collectorId])
+  @@index([mobile])
+  @@index([collectionDate])
+  @@index([status])
+  @@index([paymentMode])
+  @@map("collections")
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  expenseId   String      @unique
+  category    String      // Decoration, Sound System, Lighting, Food, Pooja Items, Transport, Printing, Rent, Electricity, Other
+  description String
+  amount      Float
+  paymentMode PaymentMode @default(CASH)
+  expenseDate DateTime    @default(now())
+  paidBy      String
+  notes       String?
+  status      Status      @default(ACTIVE)
+  voidReason  String?
+  voidedBy    String?
+  voidedAt    DateTime?
+  createdById String?
+  createdBy   User?       @relation(fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([expenseId])
+  @@index([category])
+  @@index([expenseDate])
+  @@index([status])
+  @@map("expenses")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  userName    String?
+  role        String?
+  action      String   // LOGIN, LOGOUT, CREATE_COLLECTION, UPDATE_COLLECTION, VOID_COLLECTION, CREATE_EXPENSE, UPDATE_EXPENSE, VOID_EXPENSE, CREATE_DONOR, UPDATE_DONOR, CREATE_USER, UPDATE_USER, EXPORT_EXCEL, CHANGE_SETTINGS
+  entity      String?  // Collection, Expense, Donor, User, Settings, Export
+  entityId    String?
+  description String
+  ipAddress   String?
+  details     String?  // JSON metadata string
+  createdAt   DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model Settings {
+  id                       String   @id @default("default")
+  mandalName               String   @default("अष्टविनायक मित्र मंडळ")
+  mandalNameEn             String   @default("Ashtavinayak Mitra Mandal")
+  establishedYear          Int      @default(1987)
+  festivalYear             String   @default("३९ वा गणेशोत्सव")
+  location                 String   @default("रोहित कॉलनी, बोईसर")
+  locationEn               String   @default("Rohit Colony, Boisar")
+  brandingText             String   @default("|| गणपती बाप्पा मोरया ||")
+  receiptPrefix            String   @default("MNDL")
+  receiptStartingNo        Int      @default(1)
+  receiptFooterMarathi     String   @default("आपल्या सहकार्याबद्दल मनःपूर्वक धन्यवाद.")
+  receiptFooterEnglish     String   @default("Thank you for your generous contribution.")
+  currency                 String   @default("INR")
+  timezone                 String   @default("Asia/Kolkata")
+  dateFormat               String   @default("DD/MM/YYYY")
+  authorizedSignatoryTitle String   @default("कार्याध्यक्ष / खजिनदार")
+  updatedAt                DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Counter {
+  id  String @id
+  seq Int    @default(0)
+
+  @@map("counters")
+}
