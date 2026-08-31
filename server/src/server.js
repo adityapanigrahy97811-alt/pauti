@@ -124,10 +124,10 @@ app.use(errorHandler);
 
 // Only listen if executed directly as main module and not in serverless mode
 if (require.main === module && !process.env.VERCEL) {
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🕉️  अष्टविनायक मित्र मंडळ Server running on port ${PORT}`);
     console.log(`🔱  Location: रोहित कॉलनी, बोईसर (३९ वा गणेशोत्सव)`);
-    console.log(`🌐  API Health: http://localhost:${PORT}/api/health`);
+    console.log(`🌐  API Health: http://0.0.0.0:${PORT}/api/health`);
   });
 
   const shutdown = () => {
