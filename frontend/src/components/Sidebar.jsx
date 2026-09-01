@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export function Sidebar({ isOpen, onClose }) {
-  const { user, settings, isAdmin, isTreasurer } = useAuth();
+  const { user, settings } = useAuth();
   const { lang, t } = useLanguage();
 
   const navItems = [
@@ -121,14 +121,14 @@ export function Sidebar({ isOpen, onClose }) {
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
         />
       )}
 
-      {/* Sidebar Drawer */}
+      {/* Sidebar (Desktop Permanent + Mobile Drawer) */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-[#101018] border-r border-amber-500/20 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-[#101018] border-r border-amber-500/20 shadow-2xl flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="flex flex-col h-full">
@@ -163,7 +163,7 @@ export function Sidebar({ isOpen, onClose }) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3 space-y-1 overflow-y-auto flex-1">
+          <nav className="p-3 space-y-1 overflow-y-auto flex-1 custom-scrollbar">
             {filteredNavItems.map((item) => {
               const Icon = item.icon;
               const title = lang === 'mr' ? item.label : item.labelEn;

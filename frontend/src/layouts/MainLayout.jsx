@@ -9,8 +9,7 @@ import {
   Receipt,
   PlusCircle,
   Users,
-  Menu,
-  FileSpreadsheet
+  Menu
 } from 'lucide-react';
 
 export function MainLayout() {
@@ -25,14 +24,14 @@ export function MainLayout() {
       <div className="h-1 bg-gradient-to-r from-amber-600 via-amber-400 to-orange-600 sticky top-0 z-50 shadow-gold-sm" />
 
       <div className="flex flex-1">
-        {/* Sidebar for Desktop & Mobile Drawer */}
+        {/* Sidebar for Desktop (Permanent) & Mobile (Drawer) */}
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+        {/* Main Content Area: Offset by 288px (w-72) on Desktop */}
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-72 transition-all duration-300">
           <Header
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             isSidebarOpen={isSidebarOpen}
@@ -56,7 +55,7 @@ export function MainLayout() {
         </div>
       </div>
 
-      {/* Sticky Mobile Bottom Navigation Bar (Smartphones & Small Screens) */}
+      {/* Sticky Mobile Bottom Navigation Bar (Smartphones & Small Screens < 1024px) */}
       <nav aria-label="Mobile Navigation" className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#12121A]/95 backdrop-blur-xl border-t border-amber-500/25 px-2 py-1.5 flex items-center justify-around shadow-[0_-5px_25px_rgba(0,0,0,0.7)] safe-area-bottom">
         
         {/* 1. Dashboard */}
@@ -119,7 +118,7 @@ export function MainLayout() {
           </span>
         </NavLink>
 
-        {/* 5. Menu / All Features Drawer Toggle */}
+        {/* 5. Menu Drawer Toggle */}
         <button
           type="button"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
