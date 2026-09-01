@@ -3,7 +3,14 @@
   publish = "dist"
   command = "npm run build"
 
-# SPA Routing: Redirect all routes to index.html for React Router
+# Automatic API Proxy to Live Render Backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://mandal-collection.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA Routing: Redirect all other routes to index.html for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"

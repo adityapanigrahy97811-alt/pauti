@@ -287,9 +287,108 @@ export function Collections() {
         )}
       </div>
 
-      {/* Collections Table */}
+      {/* Collections: Desktop Table & Mobile Cards */}
       <div className="rounded-3xl bg-card-gradient border border-amber-500/20 shadow-xl overflow-hidden">
-        <div className="overflow-x-auto">
+        
+        {/* 1. Mobile Cards View (Smartphones < md) */}
+        <div className="block md:hidden divide-y divide-gray-800/80">
+          {loading ? (
+            <div className="text-center py-10">
+              <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto" />
+            </div>
+          ) : collections.length === 0 ? (
+            <div className="p-4">
+              <EmptyState
+                title="कोणतीही पावती सापडली नाही"
+                titleEn="No collections found"
+                description="नवीन पावती तयार करण्यासाठी खालील बटणावर क्लिक करा."
+                actionText="+ नवीन पावती"
+                onAction={() => navigate('/collections/new')}
+              />
+            </div>
+          ) : (
+            collections.map((c) => (
+              <div
+                key={c.id}
+                className={`p-4 space-y-2.5 transition-colors ${
+                  c.status === 'VOID' ? 'opacity-60 bg-red-950/15' : 'hover:bg-amber-500/5'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-amber-400 text-sm">
+                      {c.receiptNo}
+                    </span>
+                    {c.status === 'ACTIVE' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-semibold">
+                        सक्रिय
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-semibold">
+                        रद्द (VOID)
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400 font-mono">
+                    {formatDate(c.collectionDate)}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="font-devanagari font-bold text-white text-base">
+                      {c.donorName}
+                    </h3>
+                    {(c.mobile && !c.mobile.startsWith('NA_')) || (c.address && c.address !== '-') ? (
+                      <p className="text-xs text-gray-400 font-mono">
+                        {c.mobile && !c.mobile.startsWith('NA_') ? `📱 ${c.mobile} ` : ''}
+                        {c.address && c.address !== '-' ? `• 📍 ${c.address}` : ''}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className={`font-mono font-black text-lg ${c.status === 'VOID' ? 'line-through text-gray-400' : 'text-emerald-400'}`}>
+                      {formatCurrency(c.amount)}
+                    </div>
+                    <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-300 font-semibold mt-0.5">
+                      {c.paymentMode}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-gray-800/60">
+                  <div className="text-xs text-gray-400 font-devanagari flex items-center gap-1">
+                    <span>👤</span>
+                    <span className="text-gray-300 font-medium">{c.collector?.name || c.collectorName || '-'}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenReceipt(c.id)}
+                      className="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/35 text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>पावती छापा</span>
+                    </button>
+
+                    {isTreasurer && c.status === 'ACTIVE' && (
+                      <button
+                        onClick={() => setVoidModal({ isOpen: true, collection: c })}
+                        className="px-2.5 py-1.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 text-xs font-semibold"
+                        title="पावती रद्द करा"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* 2. Desktop Table View (Laptops & Desktops >= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#181824] text-amber-300 uppercase text-[10px] tracking-wider border-b border-gray-800">
               <tr>

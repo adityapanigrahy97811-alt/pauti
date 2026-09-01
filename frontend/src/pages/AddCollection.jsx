@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -20,7 +20,8 @@ import {
   Calendar,
   Sparkles,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  RotateCcw
 } from 'lucide-react';
 
 export function AddCollection() {
@@ -43,16 +44,20 @@ export function AddCollection() {
 
   const handleSelectDonor = (donor) => {
     setDonorName(donor.name);
-    setMobile(donor.mobile);
-    if (donor.address) setAddress(donor.address);
+    if (donor.mobile && !donor.mobile.startsWith('NA_')) {
+      setMobile(donor.mobile);
+    }
+    if (donor.address && donor.address !== '-') {
+      setAddress(donor.address);
+    }
     toast.success(
       lang === 'mr'
         ? `देणगीदार निवडले: ${donor.name} (एकूण पूर्वीचे योगदान: ${formatCurrency(donor.totalContribution)})`
-        : `Donor selected: ${donor.name} (Lifetime contribution: ${formatCurrency(donor.totalContribution)})`
+        : `Donor selected: ${donor.name} (Lifetime: ${formatCurrency(donor.totalContribution)})`
     );
   };
 
-  const amountPresets = [501, 1100, 2100, 5100, 11000, 21000];
+  const amountPresets = [101, 251, 501, 1100, 2100, 5100];
 
   const parsedAmount = parseFloat(amount) || 0;
   const wordsMr = numberToWordsMarathi(parsedAmount);
@@ -119,16 +124,16 @@ export function AddCollection() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-300">
       
       {/* Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#181824] via-[#14141E] to-[#101018] border border-amber-500/30 flex items-center justify-between shadow-xl">
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-[#181824] via-[#14141E] to-[#101018] border border-amber-500/30 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xl shadow-gold-sm">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-lg sm:text-xl shadow-gold-sm shrink-0">
             🧾
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-white font-devanagari">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white font-devanagari">
               {lang === 'mr' ? 'नवीन देणगी पावती नोंदवा' : 'Record New Donation Collection'}
             </h1>
             <p className="text-xs text-amber-400 font-devanagari mt-0.5">
@@ -139,11 +144,11 @@ export function AddCollection() {
       </div>
 
       {/* Main Collection Form */}
-      <form onSubmit={handleSubmit} className="p-6 md:p-8 rounded-3xl bg-card-gradient border border-amber-500/25 shadow-2xl space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8 rounded-3xl bg-[#14141E]/95 border border-amber-500/25 shadow-2xl space-y-5 sm:space-y-6">
         
         {/* Section 1: Donor Information */}
-        <div>
-          <div className="flex items-center gap-2 text-sm font-bold text-amber-300 font-devanagari mb-4 pb-2 border-b border-gray-800">
+        <div className="space-y-3.5">
+          <div className="flex items-center gap-2 text-sm font-bold text-amber-300 font-devanagari pb-2 border-b border-gray-800">
             <User className="w-4 h-4 text-amber-400" />
             <span>{lang === 'mr' ? '१. देणगीदार माहिती (Donor Information)' : '1. Donor Information'}</span>
           </div>
@@ -154,24 +159,60 @@ export function AddCollection() {
               value={donorName}
               onChange={setDonorName}
               onSelectDonor={handleSelectDonor}
-              placeholder={lang === 'mr' ? 'देणगीदाराचे पूर्ण नाव टाईप करा...' : 'Type donor full name...'}
+              placeholder={lang === 'mr' ? 'देणगीदाराचे पूर्ण नाव...' : 'Type donor full name...'}
               label={lang === 'mr' ? 'देणगीदाराचे नाव (Donor Name)' : 'Donor Full Name'}
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-amber-300 font-devanagari mb-1">
+                {lang === 'mr' ? 'मोबाईल क्र. (Mobile Number)' : 'Mobile Number'}
+              </label>
+              <div className="relative">
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  placeholder={lang === 'mr' ? 'उदा. 9822001122' : 'e.g. 9822001122'}
+                  maxLength={10}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 font-mono transition-all"
+                />
+                <Phone className="w-4 h-4 text-amber-400/70 absolute left-3 top-3" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-amber-300 font-devanagari mb-1">
+                {lang === 'mr' ? 'पत्ता / कॉलनी (Address / Area)' : 'Address / Area'}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder={lang === 'mr' ? 'उदा. रोहित कॉलनी, बोईसर' : 'e.g. Rohit Colony, Boisar'}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 font-devanagari transition-all"
+                />
+                <MapPin className="w-4 h-4 text-amber-400/70 absolute left-3 top-3" />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Section 2: Collection Amount & Payment Mode */}
-        <div>
-          <div className="flex items-center gap-2 text-sm font-bold text-amber-300 font-devanagari mb-4 pb-2 border-b border-gray-800">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-bold text-amber-300 font-devanagari pb-2 border-b border-gray-800">
             <IndianRupee className="w-4 h-4 text-amber-400" />
-            <span>{lang === 'mr' ? '२. देणगी रक्कम व पेमेंट पद्धत (Amount & Payment Mode)' : '2. Donation Amount & Payment Mode'}</span>
+            <span>{lang === 'mr' ? '२. देणगी रक्कम व पेमेंट (Amount & Payment)' : '2. Donation Amount & Payment'}</span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Amount Presets */}
             <div>
-              <label className="block text-xs font-semibold text-gray-400 font-devanagari mb-2">
-                {lang === 'mr' ? 'जलद रक्कम निवडा (Quick Amount Presets):' : 'Quick Amount Presets:'}
+              <label className="block text-[11px] font-semibold text-gray-400 font-devanagari mb-1.5">
+                {lang === 'mr' ? 'जलद रक्कम निवडा (Quick Amount):' : 'Quick Amount Presets:'}
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                 {amountPresets.map((preset) => (
@@ -179,10 +220,10 @@ export function AddCollection() {
                     key={preset}
                     type="button"
                     onClick={() => setAmount(String(preset))}
-                    className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all ${
+                    className={`py-2.5 px-2 rounded-xl border text-xs font-mono font-bold transition-all min-h-[44px] ${
                       parsedAmount === preset
                         ? 'bg-amber-500 text-black border-amber-400 shadow-gold-sm'
-                        : 'bg-[#0F0F17] border-gray-800 text-gray-300 hover:border-amber-500/50'
+                        : 'bg-[#0F0F17] border-gray-800 text-gray-300 hover:border-amber-500/50 active:scale-95'
                     }`}
                   >
                     ₹{preset.toLocaleString('en-IN')}
@@ -192,7 +233,7 @@ export function AddCollection() {
             </div>
 
             {/* Custom Amount & Payment Mode Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-semibold text-amber-300 font-devanagari mb-1">
                   {lang === 'mr' ? 'रक्कम (Amount in ₹) *' : 'Amount (in ₹) *'}
@@ -200,13 +241,14 @@ export function AddCollection() {
                 <div className="relative">
                   <input
                     type="number"
+                    inputMode="decimal"
                     min="1"
                     step="any"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder={lang === 'mr' ? 'उदा. ११००' : 'e.g. 1100'}
+                    placeholder={lang === 'mr' ? 'उदा. ५०१' : 'e.g. 501'}
                     required
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-lg font-mono font-bold text-emerald-400 placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-lg font-mono font-bold text-emerald-400 placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-all min-h-[46px]"
                   />
                   <IndianRupee className="w-4 h-4 text-amber-400 absolute left-3 top-3.5" />
                 </div>
@@ -220,36 +262,32 @@ export function AddCollection() {
                 <select
                   value={paymentMode}
                   onChange={(e) => setPaymentMode(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-sm text-white focus:outline-none focus:border-amber-400 transition-all"
+                  className="w-full px-3 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-sm text-white focus:outline-none focus:border-amber-400 transition-all min-h-[46px]"
                 >
                   <option value="CASH">{lang === 'mr' ? 'रोख (CASH)' : 'Cash (CASH)'}</option>
                   <option value="UPI">{lang === 'mr' ? 'युपीआय / QR Code (UPI)' : 'UPI / QR Code (UPI)'}</option>
-                  <option value="BANK_TRANSFER">{lang === 'mr' ? 'बँक ट्रान्सफर (Bank Transfer / NEFT)' : 'Bank Transfer / NEFT'}</option>
+                  <option value="BANK_TRANSFER">{lang === 'mr' ? 'बँक ट्रान्सफर (Bank Transfer)' : 'Bank Transfer / NEFT'}</option>
                 </select>
               </div>
             </div>
 
             {/* Live Amount in Words Card */}
             {parsedAmount > 0 && (
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1 animate-in fade-in">
+              <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1 animate-in fade-in">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="font-semibold text-amber-300 font-devanagari">
-                    {lang === 'mr' ? 'अक्षरी रक्कम (मराठी):' : 'Amount in Words (Marathi):'}
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="font-semibold text-amber-300 font-devanagari shrink-0">
+                    {lang === 'mr' ? 'अक्षरी रक्कम:' : 'In Words:'}
                   </span>
                   <span className="font-bold text-white font-devanagari">{wordsMr}</span>
-                </div>
-                <div className="text-[11px] text-gray-400 pl-5">
-                  <span className="italic">{lang === 'mr' ? 'In Words (English): ' : 'In Words (English): '}</span>
-                  <span className="text-gray-200">{wordsEn}</span>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Section 3: Date & Collector metadata */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        {/* Section 3: Date & Collector */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
           <div>
             <label className="block text-xs font-semibold text-amber-300 font-devanagari mb-1">
               {lang === 'mr' ? 'पावती दिनांक (Collection Date)' : 'Collection Date'}
@@ -259,7 +297,7 @@ export function AddCollection() {
                 type="date"
                 value={collectionDate}
                 onChange={(e) => setCollectionDate(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-xs text-white focus:outline-none focus:border-amber-400"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#0F0F17] border border-amber-500/30 text-xs text-white focus:outline-none focus:border-amber-400 min-h-[44px]"
               />
               <Calendar className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
             </div>
@@ -276,19 +314,20 @@ export function AddCollection() {
         </div>
 
         {/* Submit & Reset Buttons */}
-        <div className="pt-4 border-t border-gray-800 flex items-center justify-between flex-wrap gap-3">
+        <div className="pt-4 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <button
             type="button"
             onClick={handleResetForm}
-            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full sm:w-auto px-4 py-3 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-gray-800 transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
           >
-            {lang === 'mr' ? 'फॉर्म रिसेट करा (Clear Form)' : 'Clear Form'}
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>{lang === 'mr' ? 'फॉर्म रिसेट करा (Clear Form)' : 'Clear Form'}</span>
           </button>
 
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white text-sm font-bold shadow-saffron-sm hover:from-amber-400 hover:to-orange-500 transition-all flex items-center gap-2 disabled:opacity-50 font-devanagari"
+            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white text-sm font-bold shadow-saffron-sm hover:from-amber-400 hover:to-orange-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 font-devanagari active:scale-98 min-h-[48px]"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -296,7 +335,7 @@ export function AddCollection() {
               <>
                 <CheckCircle2 className="w-5 h-5" />
                 <span>
-                  {lang === 'mr' ? 'पावती जतन करा व प्रिंट काढा (Save & Generate Receipt)' : 'Save & Generate Receipt'}
+                  {lang === 'mr' ? 'पावती जतन करा व प्रिंट काढा' : 'Save & Print Receipt'}
                 </span>
               </>
             )}

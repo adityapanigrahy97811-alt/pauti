@@ -1,7 +1,19 @@
 import axios from 'axios';
 
+// Resolve base URL: use environment variable if provided, or default directly to live Render backend
+let rawBaseURL = import.meta.env.VITE_API_URL || 'https://mandal-collection.onrender.com/api';
+
+// Normalize URL: remove trailing slashes and ensure /api path
+if (rawBaseURL && rawBaseURL.startsWith('http')) {
+  rawBaseURL = rawBaseURL.replace(/\/+$/, '');
+  if (!rawBaseURL.endsWith('/api')) {
+    rawBaseURL = `${rawBaseURL}/api`;
+  }
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: rawBaseURL,
+  timeout: 45000, // 45 seconds tolerance for Render free-tier cold starts
   headers: {
     'Content-Type': 'application/json'
   }
