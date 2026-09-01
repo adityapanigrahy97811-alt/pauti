@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { LogOut, User as UserIcon, Shield, Menu, X, Sparkles, Languages } from 'lucide-react';
+import { LogOut, Menu, X, Sparkles, Languages } from 'lucide-react';
 
 export function Header({ onToggleSidebar, isSidebarOpen }) {
   const { user, logout, settings } = useAuth();
@@ -24,20 +24,21 @@ export function Header({ onToggleSidebar, isSidebarOpen }) {
     <header className="sticky top-0 z-30 bg-[#12121A]/95 backdrop-blur-md border-b border-amber-500/20 px-3 sm:px-6 py-2.5 sm:py-3 transition-all duration-200">
       <div className="flex items-center justify-between">
         
-        {/* Left: Mobile Drawer Toggle & Quick Branding */}
+        {/* Left: Mobile Drawer Toggle & Clean Desktop Breadcrumb */}
         <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Mobile Menu Button */}
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 rounded-xl bg-mandal-card border border-amber-500/25 text-amber-400 hover:bg-mandal-cardHover active:scale-95 transition-all"
+            className="lg:hidden p-2 rounded-xl bg-[#181824] border border-amber-500/25 text-amber-400 hover:bg-mandal-cardHover active:scale-95 transition-all"
             aria-label="Toggle Sidebar"
           >
             {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          {/* Branding for Mobile & Desktop */}
-          <div className="flex items-center gap-2.5">
-            <div className="lg:hidden w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 p-0.5 shadow-gold-sm border border-amber-300/40 shrink-0 overflow-hidden">
+          {/* Mobile-Only Branding (Hidden on Desktop to prevent duplication with Sidebar) */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 p-0.5 shadow-gold-sm border border-amber-300/40 shrink-0 overflow-hidden">
               <img
                 src="/bappa_hero_bg.jpg"
                 alt="अष्टविनायक बाप्पा"
@@ -45,18 +46,20 @@ export function Header({ onToggleSidebar, isSidebarOpen }) {
               />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base lg:text-lg font-bold font-devanagari text-white tracking-wide truncate max-w-[200px] sm:max-w-none">
-                  {lang === 'mr' ? (settings?.mandalName || 'अष्टविनायक मित्र मंडळ') : (settings?.mandalNameEn || 'Ashtavinayak Mitra Mandal')}
-                </h1>
-                <span className="hidden sm:inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  {lang === 'mr' ? (settings?.festivalYear || '३९ वा गणेशोत्सव') : '39th Ganeshotsav'}
-                </span>
-              </div>
-              <p className="text-[11px] text-amber-400/80 font-medium hidden sm:block">
-                {lang === 'mr' ? (settings?.location || 'रोहित कॉलनी, बोईसर') : (settings?.locationEn || 'Rohit Colony, Boisar')} • <span className="text-orange-400">{t('blessing')}</span>
-              </p>
+              <h1 className="text-xs sm:text-sm font-bold font-devanagari text-white tracking-wide truncate max-w-[170px] sm:max-w-none">
+                {lang === 'mr' ? (settings?.mandalName || 'अष्टविनायक मित्र मंडळ') : (settings?.mandalNameEn || 'Ashtavinayak Mandal')}
+              </h1>
             </div>
+          </div>
+
+          {/* Desktop-Only Clean Status Banner */}
+          <div className="hidden lg:flex items-center gap-2">
+            <span className="text-sm font-bold font-devanagari text-white">
+              🕉️ {lang === 'mr' ? (settings?.mandalName || 'अष्टविनायक मित्र मंडळ') : (settings?.mandalNameEn || 'Ashtavinayak Mitra Mandal')}
+            </span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold font-devanagari">
+              {lang === 'mr' ? (settings?.festivalYear || '३९ वा गणेशोत्सव २०२६') : '39th Ganeshotsav 2026'}
+            </span>
           </div>
         </div>
 
@@ -92,7 +95,7 @@ export function Header({ onToggleSidebar, isSidebarOpen }) {
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="hidden sm:block">
-                <div className="text-xs font-semibold text-white leading-tight max-w-[120px] truncate">{user?.name}</div>
+                <div className="text-xs font-semibold text-white leading-tight max-w-[130px] truncate">{user?.name}</div>
                 <div className="text-[10px] text-amber-400/80 font-medium">{user?.role}</div>
               </div>
             </button>

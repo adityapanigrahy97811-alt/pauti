@@ -33,7 +33,7 @@ export function Sidebar({ isOpen, onClose }) {
     {
       to: '/collections/new',
       label: '+ नवीन पावती',
-      labelEn: '+ New Collection',
+      labelEn: '+ New Receipt',
       icon: PlusCircle,
       roles: ['ADMIN', 'TREASURER', 'COLLECTOR'],
       highlight: true
@@ -76,7 +76,7 @@ export function Sidebar({ isOpen, onClose }) {
     {
       to: '/data-management',
       label: 'एक्सेल डेटा सिस्टीम',
-      labelEn: 'Data & Excel Export',
+      labelEn: 'Excel Data & Export',
       icon: FileSpreadsheet,
       roles: ['ADMIN', 'TREASURER']
     },
@@ -132,7 +132,7 @@ export function Sidebar({ isOpen, onClose }) {
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Mandal Logo Banner & Mobile Close Button */}
+          {/* Mandal Logo Banner */}
           <div className="p-4 border-b border-amber-500/20 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 p-0.5 shadow-gold-sm shrink-0 overflow-hidden">
@@ -146,7 +146,7 @@ export function Sidebar({ isOpen, onClose }) {
                 <h2 className="text-sm font-bold font-devanagari text-white leading-tight">
                   {lang === 'mr' ? (settings?.mandalName || 'अष्टविनायक मित्र मंडळ') : (settings?.mandalNameEn || 'Ashtavinayak Mandal')}
                 </h2>
-                <p className="text-[10px] font-medium text-amber-400 font-devanagari mt-0.5">
+                <p className="text-[11px] font-medium text-amber-400 font-devanagari mt-0.5">
                   {lang === 'mr' ? (settings?.festivalYear || '३९ वा गणेशोत्सव') : '39th Ganeshotsav'} • {lang === 'mr' ? 'बोईसर' : 'Boisar'}
                 </p>
               </div>
@@ -154,6 +154,7 @@ export function Sidebar({ isOpen, onClose }) {
 
             {/* Close Button on Mobile */}
             <button
+              type="button"
               onClick={onClose}
               className="lg:hidden p-2 rounded-xl bg-gray-800/80 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
               aria-label="Close Menu"
@@ -162,12 +163,11 @@ export function Sidebar({ isOpen, onClose }) {
             </button>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="p-3 space-y-1 overflow-y-auto flex-1 custom-scrollbar">
+          {/* Navigation Links with Crisp, Clean Typography */}
+          <nav className="p-3 space-y-1.5 overflow-y-auto flex-1 custom-scrollbar">
             {filteredNavItems.map((item) => {
               const Icon = item.icon;
               const title = lang === 'mr' ? item.label : item.labelEn;
-              const subTitle = lang === 'mr' ? item.labelEn : item.label;
 
               return (
                 <NavLink
@@ -177,24 +177,23 @@ export function Sidebar({ isOpen, onClose }) {
                     if (window.innerWidth < 1024) onClose();
                   }}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all duration-150 group min-h-[44px] ${
+                    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group min-h-[42px] ${
                       item.highlight
-                        ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-saffron-sm hover:from-amber-400 hover:to-orange-500 font-semibold'
+                        ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 text-white shadow-saffron-sm hover:from-amber-400 hover:to-orange-500 font-bold border border-amber-400/40'
                         : isActive
-                        ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-gold-sm font-semibold'
-                        : 'text-gray-400 hover:text-gray-100 hover:bg-mandal-cardHover'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-gold-sm font-bold'
+                        : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
                     }`
                   }
                 >
                   <Icon
-                    className={`w-5 h-5 transition-transform group-hover:scale-110 shrink-0 ${
-                      item.highlight ? 'text-white' : 'text-amber-400/80 group-hover:text-amber-300'
+                    className={`w-4 h-4 transition-transform group-hover:scale-110 shrink-0 ${
+                      item.highlight ? 'text-white' : 'text-amber-400/90 group-hover:text-amber-300'
                     }`}
                   />
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-devanagari text-xs leading-tight truncate">{title}</span>
-                    <span className="text-[9px] text-gray-400 group-hover:text-gray-300 font-mono truncate">{subTitle}</span>
-                  </div>
+                  <span className="font-devanagari text-xs font-semibold leading-normal truncate">
+                    {title}
+                  </span>
                 </NavLink>
               );
             })}
