@@ -3,12 +3,12 @@ const app = require('./src/server');
 
 const PORT = 5001;
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, '127.0.0.1', async () => {
   console.log(`🧪 Sanity test server running on port ${PORT}...`);
 
   const request = (path, options = {}) => {
     return new Promise((resolve, reject) => {
-      const req = http.request(`http://localhost:${PORT}${path}`, options, (res) => {
+      const req = http.request(`http://127.0.0.1:${PORT}${path}`, options, (res) => {
         let data = [];
         res.on('data', chunk => data.push(chunk));
         res.on('end', () => {
@@ -123,6 +123,8 @@ const server = app.listen(PORT, async () => {
   } catch (err) {
     console.error('❌ Sanity test failed:', err);
   } finally {
-    server.close();
+    server.close(() => {
+      process.exit(0);
+    });
   }
 });

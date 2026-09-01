@@ -1,9 +1,24 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+let prismaClientInstance;
+function getPrismaClient() {
+  if (!prismaClientInstance) {
+    prismaClientInstance = new PrismaClient();
+  }
+  return prismaClientInstance;
+}
 
-async function main() {
+/**
+ * Seed database with initial Settings, Users, Collectors, and Counters.
+ * Fully idempotent: safe to execute multiple times against fresh or existing databases.
+ *
+ * @param {PrismaClient} [client] - Optional PrismaClient instance
+ */
+async function seedDatabase(client) {
+  const prisma = client || getPrismaClient();
+
   console.log('🌱 Starting database seed for Ashtavinayak Mitra Mandal...');
 
   // 1. Initialize Settings
@@ -29,22 +44,44 @@ async function main() {
       authorizedSignatoryTitle: 'कार्याध्यक्ष / खजिनदार'
     }
   });
-  console.log('✅ Settings initialized');
+  console.log('✅ Mandal settings ready');
 
-  // 2. Create Users
+  // 2. Prepare Credentials from Environment Variables or project defaults
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123';
+  const ADMIN_NAME = process.env.ADMIN_NAME || 'Aditya Patil (Admin)';
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@ashtavinayak-boisar.org';
+  const ADMIN_MOBILE = process.env.ADMIN_MOBILE || '9822001122';
+
+  const TREASURER_USERNAME = process.env.TREASURER_USERNAME || 'treasurer';
+  const TREASURER_PASSWORD = process.env.TREASURER_PASSWORD || 'Treasurer@123';
+  const TREASURER_NAME = process.env.TREASURER_NAME || 'Santosh Sawant (Treasurer)';
+  const TREASURER_EMAIL = process.env.TREASURER_EMAIL || 'treasurer@ashtavinayak-boisar.org';
+  const TREASURER_MOBILE = process.env.TREASURER_MOBILE || '9833445566';
+
+  const COLLECTOR_USERNAME = process.env.COLLECTOR_USERNAME || 'collector1';
+  const COLLECTOR_PASSWORD = process.env.COLLECTOR_PASSWORD || 'Collector@123';
+  const COLLECTOR_NAME = process.env.COLLECTOR_NAME || 'Sachin Jadhav (Collector)';
+  const COLLECTOR_EMAIL = process.env.COLLECTOR_EMAIL || 'collector1@ashtavinayak-boisar.org';
+  const COLLECTOR_MOBILE = process.env.COLLECTOR_MOBILE || '9877889900';
+
   const salt = await bcrypt.genSalt(10);
-  const adminPasswordHash = await bcrypt.hash('Admin@123', salt);
-  const treasurerPasswordHash = await bcrypt.hash('Treasurer@123', salt);
-  const collectorPasswordHash = await bcrypt.hash('Collector@123', salt);
+  const adminPasswordHash = await bcrypt.hash(ADMIN_PASSWORD, salt);
+  const treasurerPasswordHash = await bcrypt.hash(TREASURER_PASSWORD, salt);
+  const collectorPasswordHash = await bcrypt.hash(COLLECTOR_PASSWORD, salt);
 
+  // 3. Upsert Users (Idempotent - preserves existing data, ensures ACTIVE status)
   const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
-    update: { password: adminPasswordHash },
+    where: { username: ADMIN_USERNAME },
+    update: {
+      status: 'ACTIVE',
+      role: 'ADMIN'
+    },
     create: {
-      name: 'Aditya Patil (Admin)',
-      username: 'admin',
-      email: 'admin@ashtavinayak-boisar.org',
-      mobile: '9822001122',
+      name: ADMIN_NAME,
+      username: ADMIN_USERNAME,
+      email: ADMIN_EMAIL,
+      mobile: ADMIN_MOBILE,
       password: adminPasswordHash,
       role: 'ADMIN',
       status: 'ACTIVE',
@@ -53,70 +90,126 @@ async function main() {
   });
 
   const treasurerUser = await prisma.user.upsert({
-    where: { username: 'treasurer' },
-    update: { password: treasurerPasswordHash },
+    where: { username: TREASURER_USERNAME },
+    update: {
+      status: 'ACTIVE',
+      role: 'TREASURER'
+    },
     create: {
-      name: 'Santosh Sawant (Treasurer)',
-      username: 'treasurer',
-      email: 'treasurer@ashtavinayak-boisar.org',
-      mobile: '9833445566',
+      name: TREASURER_NAME,
+      username: TREASURER_USERNAME,
+      email: TREASURER_EMAIL,
+      mobile: TREASURER_MOBILE,
       password: treasurerPasswordHash,
       role: 'TREASURER',
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      mustChangePassword: false
     }
   });
 
   const collectorUser = await prisma.user.upsert({
-    where: { username: 'collector1' },
-    update: { password: collectorPasswordHash },
+    where: { username: COLLECTOR_USERNAME },
+    update: {
+      status: 'ACTIVE',
+      role: 'COLLECTOR'
+    },
     create: {
-      name: 'Sachin Jadhav (Collector)',
-      username: 'collector1',
-      email: 'collector1@ashtavinayak-boisar.org',
-      mobile: '9877889900',
+      name: COLLECTOR_NAME,
+      username: COLLECTOR_USERNAME,
+      email: COLLECTOR_EMAIL,
+      mobile: COLLECTOR_MOBILE,
       password: collectorPasswordHash,
       role: 'COLLECTOR',
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      mustChangePassword: false
     }
   });
-  console.log('✅ Default users created (admin, treasurer, collector1)');
+  console.log(`✅ Default users ready: @${adminUser.username} (ADMIN), @${treasurerUser.username} (TREASURER), @${collectorUser.username} (COLLECTOR)`);
 
-  // 3. Initialize Counters
-  await prisma.counter.upsert({
-    where: { id: 'receipt_2026' },
-    update: {},
-    create: { id: 'receipt_2026', seq: 0 }
-  });
+  // 4. Upsert Dedicated Collector directory records
+  if (prisma.collector && typeof prisma.collector.findFirst === 'function') {
+    const defaultCollectors = [
+      { name: 'Sachin Jadhav', mobile: '9877889900' },
+      { name: 'Amit Patil', mobile: '9822112233' },
+      { name: 'Rahul More', mobile: '9890123456' }
+    ];
 
-  await prisma.counter.upsert({
-    where: { id: 'expense_2026' },
-    update: {},
-    create: { id: 'expense_2026', seq: 0 }
-  });
-  console.log('✅ Counters initialized to 0');
+    for (const col of defaultCollectors) {
+      const existingCol = await prisma.collector.findFirst({
+        where: { name: col.name }
+      });
+      if (!existingCol) {
+        await prisma.collector.create({
+          data: {
+            name: col.name,
+            mobile: col.mobile,
+            isActive: true
+          }
+        });
+      }
+    }
+    console.log('✅ Default collection representatives ready');
+  }
 
-  // 4. Initial Audit Log
-  await prisma.auditLog.create({
-    action: 'INITIALIZE_SYSTEM',
-    entity: 'System',
-    entityId: 'default',
-    description: 'Ashtavinayak Mitra Mandal System initialized for 39th Ganeshotsav 2026.',
-    userId: adminUser.id,
-    userName: adminUser.name,
-    role: adminUser.role,
-    ipAddress: '127.0.0.1',
-    details: JSON.stringify({ version: '1.0.0', year: 2026, mandal: 'अष्टविनायक मित्र मंडळ' })
-  });
-  console.log('✅ Audit log created');
+  // 5. Initialize Sequence Counters
+  if (prisma.counter && typeof prisma.counter.upsert === 'function') {
+    await prisma.counter.upsert({
+      where: { id: 'receipt_2026' },
+      update: {},
+      create: { id: 'receipt_2026', seq: 0 }
+    });
 
-  console.log('🎉 Production Seed process completed successfully! System is clean and ready for real entries.');
+    await prisma.counter.upsert({
+      where: { id: 'expense_2026' },
+      update: {},
+      create: { id: 'expense_2026', seq: 0 }
+    });
+    console.log('✅ Sequence counters initialized');
+  }
+
+  // 6. Initial Audit Log
+  if (prisma.auditLog && typeof prisma.auditLog.findFirst === 'function') {
+    const existingAudit = await prisma.auditLog.findFirst({
+      where: { action: 'INITIALIZE_SYSTEM' }
+    });
+
+    if (!existingAudit) {
+      await prisma.auditLog.create({
+        data: {
+          action: 'INITIALIZE_SYSTEM',
+          entity: 'System',
+          entityId: 'default',
+          description: 'Ashtavinayak Mitra Mandal System initialized for 39th Ganeshotsav 2026.',
+          userId: adminUser.id,
+          userName: adminUser.name,
+          role: adminUser.role,
+          ipAddress: '127.0.0.1',
+          details: JSON.stringify({ version: '1.0.0', year: 2026, mandal: 'अष्टविनायक मित्र मंडळ' })
+        }
+      });
+      console.log('✅ System initialization audit log recorded');
+    }
+  }
+
+  console.log('🎉 Seed process completed successfully! System is clean and ready.');
+  return { adminUser, treasurerUser, collectorUser, settings };
 }
 
-main()
-  .catch((e) => {
-    console.error('❌ Error in database seed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Run directly when called via `node prisma/seed.js` or `npm run seed`
+if (require.main === module) {
+  const client = getPrismaClient();
+  seedDatabase(client)
+    .catch((e) => {
+      console.error('❌ Error during database seed:', e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      if (prismaClientInstance) {
+        await prismaClientInstance.$disconnect();
+      }
+    });
+}
+
+module.exports = {
+  seedDatabase
+};

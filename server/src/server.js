@@ -119,15 +119,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+const { bootstrapDatabase } = require('./utils/bootstrap');
+
 // Centralized Error Handling
 app.use(errorHandler);
 
 // Only listen if executed directly as main module and not in serverless mode
 if (require.main === module && !process.env.VERCEL) {
-  const server = app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', async () => {
     console.log(`🕉️  अष्टविनायक मित्र मंडळ Server running on port ${PORT}`);
     console.log(`🔱  Location: रोहित कॉलनी, बोईसर (३९ वा गणेशोत्सव)`);
     console.log(`🌐  API Health: http://0.0.0.0:${PORT}/api/health`);
+
+    // Verify and ensure admin account exists on startup
+    await bootstrapDatabase();
   });
 
   const shutdown = () => {

@@ -54,8 +54,8 @@ You can deploy the **entire project (Frontend + API)** directly on [Vercel](http
 2. Connect your GitHub repository.
 3. Configure settings:
    - **Root Directory**: `server`
-   - **Build Command**: `npm install && npx prisma generate`
-   - **Start Command**: `npm start`
+   - **Build Command**: `npm install && npx prisma generate && npx prisma db push`
+   - **Start Command**: `npm start` (Automatically boots server & seeds initial Admin if empty)
 4. Under **Environment Variables**, add:
    - `DATABASE_URL`: Your PostgreSQL database URL
    - `JWT_SECRET`: A long secure random string

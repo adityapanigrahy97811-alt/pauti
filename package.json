@@ -11,7 +11,11 @@
     "vercel-build": "cd frontend && npm install && npm run build",
     "prisma:generate": "cd server && npx prisma generate",
     "prisma:migrate": "cd server && npx prisma migrate dev",
+    "prisma:push": "cd server && npx prisma db push",
     "prisma:seed": "cd server && node prisma/seed.js",
+    "db:push": "cd server && npm run db:push",
+    "db:seed": "cd server && npm run db:seed",
+    "db:setup": "cd server && npm run db:setup",
     "start": "cd server && node src/server.js"
   },
   "keywords": [
